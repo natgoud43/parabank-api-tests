@@ -1,0 +1,27 @@
+name: Parabank API suite
+
+on:
+  push:                 # every push wakes the robot
+  workflow_dispatch:    # adds a "Run workflow" button on GitHub
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6         # copy your repo onto the machine
+      - uses: actions/setup-python@v6     # install Python
+        with:
+          python-version: "3.13"
+
+      - name: Install pytest
+        run:  pip install -r requirements.txt
+        
+      - name: Run the suite
+        run: python -m pytest --junitxml=results.xml
+
+      - name: Save test results
+        if: always()                      # save them even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: results.xml
