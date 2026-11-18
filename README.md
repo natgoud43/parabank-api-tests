@@ -1,5 +1,5 @@
 # Parabank API Tests
-![Parabank API test suite](https://github.com/natgoud43/parabank-api-tests/actions/workflows/tests.yml/badge.svg)
+![Parabank API test suite](https://github.com/natgoud43/parabank-tests/actions/workflows/tests.yml/badge.svg)
 
 Pytest + requests tests for the [Parabank](https://parabank.parasoft.com) demo bank's REST API.
 

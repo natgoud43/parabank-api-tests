@@ -11,5 +11,5 @@ def api():
     session.close()
 
 @pytest.fixture(scope="session")
-def base_url():
+def api_base_url():
     return BASE
