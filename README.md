@@ -24,6 +24,7 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
+- A wrong password returns "An internal error has occurred" instead of the login error (seen Nov 19; tracked as xfail).
 
 ## Design notes
 - **Both layers read at the same moment.** Cross-checks call the API inside the test, right before checking the UI, so data changes on the shared server don't cause false failures.

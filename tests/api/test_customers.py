@@ -33,7 +33,6 @@ def test_customer_address_has_all_fields(api, api_base_url):
     for key in ["street","city","state","zipCode"]:
         assert key in body["address"]
     
-   
 def test_unknown_customer_returns_400(api, api_base_url):
     response = api.get(f"{api_base_url}/customers/9999999")
     assert response.status_code == 400
