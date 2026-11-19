@@ -1,4 +1,5 @@
 from playwright.sync_api import Page, expect
+import pytest
 
 def test_login_with_valid_user_shows_accounts_overview(page: Page):
     page.goto("https://parabank.parasoft.com/parabank/index.htm")
@@ -7,6 +8,10 @@ def test_login_with_valid_user_shows_accounts_overview(page: Page):
     page.get_by_role("button", name="Log In").click()
     expect(page.get_by_role("heading", name="Accounts Overview")).to_be_visible()
 
+@pytest.mark.xfail(
+        reason="Parabank demo returns 'An internal error has occured' for a wrong password (seen Nov 19)",
+        raises = AssertionError,
+)
 def test_login_with_wrong_password_shows_error(page:Page):
     page.goto("https://parabank.parasoft.com/parabank/index.htm")
     page.locator("input[name=\"username\"]").fill("john")

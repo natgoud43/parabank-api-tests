@@ -1,24 +1,58 @@
-# Parabank API Tests
-![Parabank API test suite](https://github.com/natgoud43/parabank-tests/actions/workflows/tests.yml/badge.svg)
+# Parabank Tests
+![Parabank tests suite](https://github.com/natgoud43/parabank-tests/actions/workflows/tests.yml/badge.svg)
 
-Pytest + requests tests for the [Parabank](https://parabank.parasoft.com) demo bank's REST API.
+Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two layers: the **REST API** (requests) and the **web UI** (Playwright), plus **cross-checks** that compare the two.
 
 ## What the suite checks
-- Existing customer response holds customer first name
-- Every account returned for a customer belongs to that customer (customerId matches)
-- Unknown customer id returns code 404 (not found).Expected by REST convention; see Known issues
-- Negative id (-1) returns 400 (bad request); a non-numeric id (abc) returns 404 (no such path)
+
+### API (`tests/api`)
+- An existing customer's details include the expected first name.
+- Every account returned for a customer belongs to that customer (customerId matches).
+- Account details follow the rules: correct id and customer, and a known account type.
+- A customer's address has all its fields (street, city, state, zipCode).
+- Unknown customer ids return 404 (expected by REST convention; see Known issues); -1 returns 400; a non-numeric id returns 404
+
+### UI (`tests/ui`)
+- Logging in with a valid user shows Accounts Overview.
+- A wrong password shows "The username and password could not be verified."
+- Log Out returns to the Customer Login form.
+
+### Cross-layer checks (`tests/ui/test_cross_checks.py`)
+- Every account the API returns appears on the Accounts Overview page.
+- The greeting shows the customer name the API returns.
+- An account's details page shows the same account type as the API.
 
 ## Known issues (by design: xfail)
-- For customer id "0" and "99999999" Parabank returns code 400
+- For customer id "0" and "99999999" Parabank returns code 400.
+- A wrong password returns "An internal error has occurred" instead of the login error (seen Nov 19; tracked as xfail).
 
 ## Design notes
-- **Assert rules, not snapshots.** Shared public demo server: data changes all the time, so tests check rules that always hold, not current values like counts or balances
-- **One session for the whole run.** Headers are set once and one connection is reused for the whole run
-- **Strict xfail.** Known issues are xfail(raises=AssertionError), so unrelated errors still show; xfail_strict makes an unexpected pass fail loudly
+- **Both layers read at the same moment.** Cross-checks call the API inside the test, right before checking the UI, so data changes on the shared server don't cause false failures.
+- **Test data comes from the API.** No hard-coded account ids: tests ask the API for a real account first, because accounts on the demo server come and go.
+- **Exact for values, contains for containers.** Single values (an account id or type) are checked exactly; page sections are checked with "contains".
+- **Same tests, any browser.** Browser settings come from the command line, not the code. CI runs headless with the Chrome preinstalled on Ubuntu, so a full run takes about 30 seconds.
+
+## Project structure:
+parabank-tests/
+├── .github/workflows/tests.yml
+├── README.md
+├── pytest.ini
+├── requirements.txt
+└── tests/
+    ├── conftest.py              # shared fixtures: api session, api_base_url
+    ├── api/
+    │   └── test_customers.py
+    └── ui/
+        ├── test_login.py
+        └── test_cross_checks.py
 
 ## How to run
+
 ```
 pip install -r requirements.txt
-python -m pytest
+python -m pytest                                 # everything, headless
+python -m pytest tests/api                       # API tests only
+python -m pytest tests/ui --headed --slowmo 500  # watch the browser
 ```
+
+On Windows with Smart App Control, add `--browser-channel chrome` to use the installed, signed Chrome.
