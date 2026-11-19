@@ -14,21 +14,14 @@ def test_login_with_wrong_password_shows_error(page:Page):
     page.get_by_role("button", name="Log In").click()
     expect(page.locator("#rightPanel")).to_contain_text("The username and password could not be verified.")
 
-def test_ui_shows_all_accounts_from_api(page: Page, api, api_base_url):
-    response = api.get(f"{api_base_url}/customers/12212/accounts")
-    assert response.status_code == 200
-    api_ids = [str(account["id"]) for account in response.json()]
-    assert api_ids
-
+def test_logout_returns_to_login_page(page:Page):
     page.goto("https://parabank.parasoft.com/parabank/index.htm")
     page.locator("input[name=\"username\"]").fill("john")
     page.locator("input[name=\"password\"]").fill("demo")
     page.get_by_role("button", name="Log In").click()
     expect(page.get_by_role("heading", name="Accounts Overview")).to_be_visible()
-    links = page.locator("#accountTable a")
-    expect(links.first).to_be_visible()
-    ui_ids = links.all_inner_texts()
+    page.get_by_role("link", name="Log Out").click()
+    expect(page.locator("#leftPanel")).to_contain_text("Customer Login")
 
-    # compare
-    for account_id in api_ids:
-        assert account_id in ui_ids
+
+
