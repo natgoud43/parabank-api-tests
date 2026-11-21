@@ -24,13 +24,14 @@ Pytest tests for the [Parabank](https://parabank.parasoft.com) demo bank, on two
 
 ## Known issues (by design: xfail)
 - For customer id "0" and "99999999" Parabank returns code 400.
-- A wrong password returns "An internal error has occurred" instead of the login error (seen Nov 19; tracked as xfail).
+- Sometimes wrong password returns "An internal error has occurred" instead of the login error (seen Nov 19; tracked as commented xfail).
 
 ## Design notes
 - **Both layers read at the same moment.** Cross-checks call the API inside the test, right before checking the UI, so data changes on the shared server don't cause false failures.
 - **Test data comes from the API.** No hard-coded account ids: tests ask the API for a real account first, because accounts on the demo server come and go.
 - **Exact for values, contains for containers.** Single values (an account id or type) are checked exactly; page sections are checked with "contains".
 - **Same tests, any browser.** Browser settings come from the command line, not the code. CI runs headless with the Chrome preinstalled on Ubuntu, so a full run takes about 30 seconds.
+- **Page objects.** Each page has a class in `pages/` that holds its locators and actions (`LoginPage`, `OverviewPage`, `AccountDetailsPage`). Tests press their buttons and do all the asserting, so a change on the website is fixed in one place.
 
 ## Project structure:
 parabank-tests/
@@ -38,8 +39,12 @@ parabank-tests/
 ├── README.md
 ├── pytest.ini
 ├── requirements.txt
+├── pages/                         # page objects: locators and actions, no asserts
+│   ├── login_page.py
+│   ├── overview_page.py
+│   └── account_details_page.py
 └── tests/
-    ├── conftest.py              # shared fixtures: api session, api_base_url
+    ├── conftest.py                # shared fixtures: api session, api_base_url
     ├── api/
     │   └── test_customers.py
     └── ui/
